@@ -24,7 +24,11 @@ exports.sourceNodes = async (
 		// linkImagesToOriginal: true,
 		// showCaptions: false,
 		// pathPrefix,
-		// withWebp: false
+		// withWebp: false,
+		searchAndReplaceContentUrls: {
+			sourceUrl: null,
+			replacementUrl: null,
+		},
 	}
 
 	const options = _.defaults(pluginOptions, defaults)
@@ -151,8 +155,16 @@ const replaceImage = async ({
 }) => {
 	// find the full size image that matches, throw away WP resizes
 	const parsedUrlData = parseWPImagePath(thisImg.attr("src"))
-	const url = parsedUrlData.cleanUrl
+	let url = parsedUrlData.cleanUrl
 
+	if (options.searchAndReplaceContentUrls && options.searchAndReplaceContentUrls.sourceUrl && options.searchAndReplaceContentUrls.replacementUrl) {
+		const {
+			sourceUrl,
+			replacementUrl
+		} = options.searchAndReplaceContentUrls;
+		url = url.replace(new RegExp(sourceUrl, `g`), replacementUrl);
+	}
+	
 	let imageNode
 
 	// Try to download the full size image without the WP resize parameters (removed on parse)
